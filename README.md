@@ -10,7 +10,9 @@
 
 [需求分析](docs/Requirements-analysis.md)
 
-[面向对象需求设计](docs/Object-oriented-analysis.md)
+[面向对象需求分析](docs/Object-oriented-analysis.md)
+
+[面向对象设计](docs/Object-oriented-design.md)
 
 
 
