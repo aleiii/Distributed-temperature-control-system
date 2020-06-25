@@ -192,3 +192,131 @@
 > 序列图：
 
 ![](pic/ood/关闭空调-序列图.png)
+
+## 2. 静态结构设计
+
+系统设计类图如下：
+
+![](pic\ood\设计类图.png)
+
+| 方法名             | 方法说明                          |
+| ------------------ | --------------------------------- |
+| InitRM()           | 初始化ResourceManager             |
+| InitACA()          | 初始化AirConditionerAdministrator |
+| InitInvoice()      | 初始化Invoice                     |
+| InitDetailRecord() | 初始化DetailRecord                |
+| InitHMStat()       | 初始化HMStatistical               |
+| InitHMReport()     | 初始化HMReport                    |
+| InitReception()    | 初始化Reception                   |
+| InitLine()         | 初始化服务队列和等待队列          |
+| On()               | 开机                              |
+| Down()             | 关机                              |
+
+### 2.1 前台
+
+#### 2.1.1 DetailRecord
+
+<div STYLE="page-break-after: always;"></div>
+
+| 属性名                | 属性说明             |
+| --------------------- | -------------------- |
+| RoomID: int           | 当期请求服务的房间ID |
+| time                  | 请求发出的时间       |
+| RequestDuration: time | 请求响应时间         |
+| FanSpeed: int         | 风速                 |
+| FeeRate: float        | 利率                 |
+| Fee: float            | 费用                 |
+
+| 方法名                       | 方法说明                 |
+| ---------------------------- | ------------------------ |
+| Create()                     | 创建DetailRecord实例对象 |
+| PrintRDR(RoomId,list_RDR( )) | 打印出详单,存为文件形式  |
+
+#### 2.1.2 Invoice
+
+| 属性名          | 属性说明             |
+| --------------- | -------------------- |
+| RoomID:int      | 当期请求服务的房间ID |
+| Total_Fee:Float | 该服务对象的总费用   |
+| Date_Out:date   | 该服务对象退房日期   |
+
+| 方法名           | 方法说明                |
+| ---------------- | ----------------------- |
+| Create()         | 创建Invoice实例对象     |
+| PrintRDR(RoomId) | 打印出账单,存为文件形式 |
+
+### 2.2 酒店经理
+
+#### 2.2.1 HM_Statistical
+
+| 属性名              | 属性说明                                       |
+| ------------------- | ---------------------------------------------- |
+| ID_Room_List: list  | 要查看的房间号列表                             |
+| Time_Frame: date    | 时间范围                                       |
+| Type_Report: string | 报表类型：日报、周报、月报、年报（默认为日报） |
+| ID_Report: string   | 报表号                                         |
+
+| 方法名             | 方法说明                         |
+| ------------------ | -------------------------------- |
+| ReportStatistics() | 创建报表实例, 修改报表实例的属性 |
+| ReportCheck(HM_r)  | 检查报表统计记录                 |
+
+#### 2.2.2 HM_Report
+
+| 属性名              | 属性说明                                       |
+| ------------------- | ---------------------------------------------- |
+| ID_Room_List: list  | 要查看的房间号列表                             |
+| Time_Frame: date    | 时间范围                                       |
+| Type_Report: string | 报表类型：日报、周报、月报、年报（默认为日报） |
+| ID_Report: string   | 报表号                                         |
+
+| 方法名         | 方法说明               |
+| -------------- | ---------------------- |
+| ReportGet()    | 返回报表信息           |
+| ReportCreate() | 生成格式化统计报表文件 |
+
+### 2.3 最终用户 & 空调管理员
+
+#### 2.4.1 ResourceManager
+
+| 方法名                                | 方法说明                                            |
+| ------------------------------------- | --------------------------------------------------- |
+| ChangeTemperature(RoomID, TargetTemp) | 更改房间号 RoomID 对应的服务对象的温度为 TargetTemp |
+| ChangeWindSpeed(RoomID, WindSpeed)    | 更改房间号 RoomID 对应的服务对象的风速为 WindSpeed  |
+| ShowBillList(RoomID)                  | 显示房间的费用信息                                  |
+| Add(Service, line)                    | 将服务 Service 加入队列line                         |
+| Delete(ServiceID, line)               | 将服务号 ServiceID 对应的服务从队列 line 中删除     |
+| Find(RoomID, line)                    | 在队列 line 中寻找 RoomID 对应的服务                |
+
+#### 2.4.2 AirConditionerAdministrator
+
+| 属性名                  | 属性说明         |
+| ----------------------- | ---------------- |
+| num_running_ac: int     | 当前运行的空调数 |
+| num_of_all_ac: int      | 空调总数         |
+| ids_of_running_ac: list | 运行空调编号列表 |
+
+| 方法名                  | 方法说明                            |
+| ----------------------- | ----------------------------------- |
+| Add(service, line)      | 将新创建的服务 service 加入队列line |
+| Delete(ServiceID, line) | 将关闭的服务从队列 line 中删除      |
+| GetACState()            | 获取空调运行状态信息                |
+| sendMessageToDBFcade()  | 传递空调信息到持久化实例            |
+
+#### 2.4.3 AirConditioner
+
+| 属性名                               | 属性说明                    |
+| ------------------------------------ | --------------------------- |
+| On: boolean = false                  | 空调开启状态                |
+| RoomID: int                          | 当前请求服务的房间ID        |
+| ServiceID: int                       | 请求服务的ID                |
+| WindSpeed: int                       | 当前风速                    |
+| temperature: int                     | 当前温度                    |
+| mode: int = 0                        | 制冷\制热模式，0为冷，1为热 |
+| runtime: time                        | 运行时间                    |
+| fee: float                           | 当前费用                    |
+| range_of_temperature: list = [18,25] | 温度范围                    |
+| runnint_time_speed_1: list = []      | 以1档风速运行的起止时间段   |
+| runnint_time_speed_2: list = []      | 以2档风速运行的起止时间段   |
+| runnint_time_speed_2: list = []      | 以3档风速运行的起止时间段   |
+
